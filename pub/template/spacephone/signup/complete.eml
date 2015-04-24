@@ -1,0 +1,13 @@
+Hi,
+
+Somebody has requested a new Space Phone prefix \o/
+
+space..: {{ form.space.data }}
+name...: {{ form.name.data }}
+email..: {{ form.email.data }}
+country: {{ form.country.data }}
+prefix.: {{ form.prefix.data }}
+remark.: {{ form.remark.data }}
+
+Kthxbye
+SpacePhone.org

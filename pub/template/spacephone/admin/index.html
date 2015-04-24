@@ -1,0 +1,36 @@
+{% extends "spacephone/base.html" %}
+
+{% block title %}SpacePhone &raquo; Admin{% endblock %}
+
+{% block content %}
+{% include "spacephone/_header.html" %}
+
+<div class="container">
+  <ol class="breadcrumb">
+    <li><a href="/">SpacePhone</a></li>
+    <li>Admin</li>
+  </ol>
+
+  {%- for zone in allocations %}
+  <h2>{{ zone }}</h2>
+    <table class="table">
+    <tr>
+      <th class="col-md-1">Prefix</th>
+      <th class="col-md-2">Organisation</th>
+      <th>Record</th>
+    </tr>
+    {%- for prefix, cnam in allocations[zone].items()|sort %}
+    <tr>
+      <td>{{ prefix }}</td>
+      <td>{{ cnam }}</td>
+      {%- if prefix == '4.3' %}
+      <td>{{ record }}</td>
+      {%- else %}
+      <td><a href="{{ url_for('admin.prefix', zone=zone, delegation=prefix) }}">{{ prefix }}.{{ zone }}</a></td>
+      {%- endif %}
+    </tr>
+    {%- endfor %}
+    </table>
+  {%- endfor %}
+</div>
+{% endblock %}

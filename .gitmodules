@@ -1,0 +1,6 @@
+[submodule "lib/github.com.speedmax.h2o-php"]
+	path = lib/github.com.speedmax.h2o-php
+	url = https://github.com/speedmax/h2o-php.git
+[submodule "lib/github.com.erusev.parsedown"]
+	path = lib/github.com.erusev.parsedown
+	url = https://github.com/erusev/parsedown.git

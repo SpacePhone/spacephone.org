@@ -1,0 +1,23 @@
+<nav class="navbar navbar-default" role="navigation">
+  <!-- Brand and toggle get grouped for better mobile display -->
+  <div class="navbar-header">
+    <a class="navbar-brand" href="/"><img src="/static/img/spacephone24.png"> SpacePhone</a>
+  </div>
+
+  <div class="collapse navbar-collapse container" id="bs-example-navbar-collapse-1">
+    <ul class="nav navbar-nav">
+{% for navlink, navtext in navigation %}
+      <li{% if navlink == request.path %} class="active"{% endif %}>
+        <a href="{{ navlink }}">{{ navtext }}</a>
+      </li>
+{% endfor %}
+    </ul>
+
+    <form class="navbar-form navbar-right" role="search" action="/lookup/">
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Number, eg +31979966" name="q" id="q">
+      </div>
+      <button type="submit" class="btn btn-default">Lookup</button>
+    </form>
+  </div>
+</nav>

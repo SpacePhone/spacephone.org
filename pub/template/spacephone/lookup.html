@@ -1,0 +1,65 @@
+{% extends "spacephone/base.html" %}
+
+{% block title %}SpacePhone &raquo; {{ enum_number }}{% endblock %}
+
+{% block content %}
+{% include "spacephone/_header.html" %}
+
+<div class="container">
+  <ol class="breadcrumb">
+    <li><a href="/">SpacePhone</a></li>
+    <li>Lookup</li>
+    <li class="active">{{ enum_number }}</li>
+  </ol>
+  <h2>E.164 lookup</h2>
+  <p>Looking up <code>{{ enum_number }}</code>:</p>
+
+  <h3>User of <code>{{ dns_name }}</code></h3>
+  {% if dns_ptrs %}
+  <table class="table table-condensed">
+  <tr>
+    <th style="width:10em">Number</th>
+    <td><a href="tel:{{ enum_number }}">{{ enum_number }}</a></td>
+  </tr>
+  {% for k, v in dns_ptrs %}
+  <tr>
+    <th style="width:10em">{{ k }}</th>
+    <td>{{ v|safe }}</td>
+  </tr>
+  {% endfor %}
+  </table>
+  {% else %}
+  <em>No user found</em>
+  {% endif %}
+
+  {% for name, info in dns_tree %}
+  <h3>Provider of zone <code>{{ name }}</code></h3>
+  <table class="table table-condensed">
+  {% if info.dds %}
+  <tr>
+    <th style="width:10em">Provider</th>
+    <td>{{ info.dds }}</td>
+  </tr>
+  {% endif %}
+  {% if info.email %}
+  <tr>
+    <th style="width:10em">Contact</th>
+    <td><a href="mailto:{{ info.email }}">{{ info.email }}</a></td>
+  </tr>
+  {% endif %}
+  {% if info.desc %}
+  <tr>
+    <th style="width:10em">Description</th>
+    <td>{{ info.desc }}</td>
+  </tr>
+  {% endif %}
+  {% if info.extra %}
+  <tr>
+    <th style="width:10em">Additional info</th>
+    <td>{{ info.extra }}</td>
+  </tr>
+  {% endif %}
+  </table>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "spacephone/base.html" %}
+
+{% block title %}SpacePhone &raquo; Admin{% endblock %}
+
+{% block content %}
+{% include "spacephone/_header.html" %}
+
+<div class="container">
+  <ol class="breadcrumb">
+    <li><a href="/">SpacePhone</a></li>
+    <li>Admin</li>
+  </ol>
+
+  <h2>{{ name }}</h2>
+  {%- for service, value in records.items()|sort %}
+  <form method="post" action="{{ url_for('.prefix_record', zone=zone, delegation=delegation) }}">
+  <input type="hidden" name="service" value="{{ service }}">
+  <table class="table">
+  {%- if (loop.index0 % 5) == 0 %}
+  <tr>
+    <th class="col-md-2">Type</th>
+    <th>Regexp</th>
+    <th>Replacement</th>
+    <th>&nbsp;</th>
+  </tr>
+  {%- endif %}
+  <tr>
+    <td class="col-md-2">{{ service }}</td>
+    <td>
+      <input type="text" class="form-control" name="regexp" value="{{ value.regexp|default('^(.*)$') }}">
+    </td>
+    <td>
+      <input type="text" class="form-control" name="replace" value="{{ value.replace }}">
+    </td>
+    <td class="col-md-1">
+      <button class="btn btn-primary">Save</button>
+    </td>
+  </tr>
+  </table>
+  </form>
+  {%- endfor %}
+</div>
+{% endblock %}

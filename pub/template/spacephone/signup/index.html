@@ -1,0 +1,30 @@
+{% extends "spacephone/base.html" %}
+
+{% block content %}
+{% include "spacephone/_header.html" %}
+
+<div class="container">
+  <ol class="breadcrumb">
+    <li><a href="/">SpacePhone</a></li>
+    <li class="active">Sign up</li>
+  </ol>
+  <img src="/static/img/spacephone128.png" style="float:right">
+  <h2>SpacePhone signup</h2>
+  <p>
+    How does free inter-space telephony sound to you? Every hacker space around
+    the globe may register for a prefix with Space Phone.
+  {% from "spacephone/_formhelpers.html" import render_field %}
+  <div class="col-md-8">
+  <form method="post" role="form" action="/signup/">
+    {{ render_field(form.space)   }}
+    {{ render_field(form.name)    }}
+    {{ render_field(form.email)   }}
+    {{ render_field(form.country) }}
+    {{ render_field(form.prefix)  }}
+    {{ render_field(form.remark)  }}
+  </dl>
+  <button class="button">Request</button>
+  </form>
+  </div>
+</div>
+{% endblock %}
