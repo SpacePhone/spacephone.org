@@ -8,7 +8,7 @@ require_once('Parsedown.php');
 
 
 class SpacePhone {
-    public $config = array();
+    public $options = array();
     public $root;
     public $html;
 
@@ -29,8 +29,8 @@ class SpacePhone {
         '9wxyz',
     );
 
-    function __construct($config, $root = null, $html = null) {
-        $this->config = $this->getOptions($config);
+    function __construct($options, $root = null, $html = null) {
+        $this->options = $this->getOptions($options);
         $this->root = realpath(is_null($root) ? dirname(__DIR__) : $root);
         $this->html = realpath(is_null($html) ? __DIR__ : $html);
 
@@ -48,6 +48,10 @@ class SpacePhone {
         return array_merge(array(
             'cache_ttl' => 300,
         ), $options);
+    }
+
+    public function config() {
+        echo $this->template('spacephone/config.html');
     }
 
     public function error($code = 500, $context = array()) {
@@ -215,11 +219,16 @@ class SpacePhone {
 
     public function template($name, $context = array()) {
         $context = array_merge(array(
-            'request' => $this->_request(),
+            'navigation' => array(
+                '/'        => 'Home',
+                '/about/'  => 'About',
+                '/options/' => 'Configuration',
+            ),
+            'request'    => $this->_request(),
         ), $context);
 
         $h2o = new H2o($name, array(
-            'cache_ttl'  => $this->config['cache_ttl'],
+            'cache_ttl'  => $this->options['cache_ttl'],
             'searchpath' => array($this->_template . '/'),
         ));
         return $h2o->render($context);
@@ -243,13 +252,13 @@ class SpacePhone {
      * Returns the parent domain for a given telephone number.
      */
     private function _e164_domain($number) {
-        foreach ($this->config['e164_zones'] as $prefix => $zone) {
+        foreach ($this->options['e164_zones'] as $prefix => $zone) {
             if (strpos((string) $number, (string) $prefix) === 0) {
                 return $zone;
             }
         }
 
-        return @$this->config['e164_zones']['default'];
+        return @$this->options['e164_zones']['default'];
     }
 
     /**
@@ -296,10 +305,10 @@ class SpacePhone {
      * Returns a DNS resolver for the given ENUM domain.
      */
     private function _resolver_for($domain) {
-        if (isset($this->config['resolvers'][$domain])) {
-            return $this->config['resolvers'][$domain];
+        if (isset($this->options['resolvers'][$domain])) {
+            return $this->options['resolvers'][$domain];
         } else {
-            return $this->config['resolvers']['default'];
+            return $this->options['resolvers']['default'];
         }
     }
 
