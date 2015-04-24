@@ -244,12 +244,12 @@ class SpacePhone {
      */
     private function _e164_domain($number) {
         foreach ($this->config['e164_zones'] as $prefix => $zone) {
-            if (strpos((string) $number, (string) $prefix) == 0) {
+            if (strpos((string) $number, (string) $prefix) === 0) {
                 return $zone;
             }
         }
 
-        return @$e164_zones['default'];
+        return @$this->config['e164_zones']['default'];
     }
 
     /**
