@@ -2,17 +2,12 @@
 
 $config = array();
 
-// DNS resolvers, "default" is mandatory
-$config['resolvers'] = array(
-    'default' => array(
-        '172.23.40.51',
-        '172.23.40.52',
-    ),
-);
+// DNS resolvers
+$config['resolvers'] = array();
 
 // E.164 zones, "default" is mandatory
 $config['e164_zones'] = array(
-    '319799'  => 'e164.spacephone.org',
-    '31979'   => 'e164.ptt-tele.com',
-    'default' => 'e164.arpa',
+    '319799'  => array('e164.spacephone.org'),
+    '31979'   => array('e164.ptt-tele.com'),
+    'default' => array('e164.arpa', 'e164.org', 'e164.info', 'e164enum.eu'),
 );

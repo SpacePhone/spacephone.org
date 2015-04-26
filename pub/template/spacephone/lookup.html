@@ -41,12 +41,14 @@
     <td>{{ info.dds }}</td>
   </tr>
   {% endif %}
-  {% if info.email %}
   <tr>
     <th style="width:10em">Contact</th>
+  {% if info.email %}
     <td><a href="mailto:{{ info.email }}">{{ info.email }}</a></td>
-  </tr>
+  {% else %}
+    <td><em>Not specified</em></td>
   {% endif %}
+  </tr>
   {% if info.desc %}
   <tr>
     <th style="width:10em">Description</th>

@@ -68,7 +68,10 @@ class SpacePhone {
      * Handle the HTTP request
      */
     public function handle() {
-        $base = trim(@$_SERVER['REQUEST_URI'], '/');
+        $base = @$_SERVER['REQUEST_URI'];
+        $base = preg_replace('/\?.*/', '', $base);
+        $base = preg_replace('/^\/*/', '', $base);
+        $base = preg_replace('/\/*$/', '', $base);
         $part = explode('/', $base);
 
         try {
@@ -108,9 +111,8 @@ class SpacePhone {
     }
 
     public function lookup() {
-        $q = filter_input(INPUT_GET, 'q', FILTER_SANITIZE_ENCODED);
-        if (strlen($q) > 0) {
-            header('Location: /lookup/' . $this->_tonumber($q));
+        if (isset($_GET['q']) && !empty($_GET['q'])) {
+            header('Location: /lookup/' . $this->_tonumber($_GET['q']));
             exit;
         }
 
@@ -130,58 +132,86 @@ class SpacePhone {
         }
 
         $enum_number = '+' . $number;
-        $enum_domain = $this->_e164_domain($number);
+        $enum_domain = NULL;
+        $enum_domains = $this->_e164_domain($number);
 
         // Lazy admin was lazy (or did not want a default)
-        if (!strlen($enum_domain)) {
+        if (!count($enum_domains)) {
             $this->error(404, array('error' => 'No zone found for number'));
             exit;
         }
 
         // Lookup the NAPTR bits for this record
-        $resolver = $this->_resolver_for($enum_domain);
         $dns_tree = array();
-        $dns_name = $this->_e164_fqdn($number, $enum_domain);
-        $dns_part = explode('.', $dns_name);
         $dns_ptrs = array();
 
-        $rrs = dns_get_record($dns_name, DNS_NAPTR, $resolver);
-        foreach ($rrs as $rr) {
-            $dns_ptrs[$rr['services']] = $this->_e2u_link(
-                $rr['services'],
-                $this->_dns_naptr_result($dns_name, $enum_domain, $rr)
-            );
-        }
+        foreach ($enum_domains as $enum_domain) {
+            $resolver = $this->_resolver_for($enum_domain);
+            $dns_name = $this->_e164_fqdn($number, $enum_domain);
+            $dns_part = explode('.', $dns_name);
 
-        // Lookup the root zone for this record
-        $dns_root = null;
-        for ($i = 0, $l = count($dns_part); $i < $l; ++$i) {
-            if (!is_numeric($dns_part[$i])) {
-                $dns_root = implode('.', array_slice($dns_part, $i));
-                break;
+            $rrs = dns_get_record($dns_name, DNS_NAPTR, $resolver);
+            foreach ($rrs as $rr) {
+                $dns_ptrs[$rr['services']] = $this->_e2u_link(
+                    $rr['services'],
+                    $this->_dns_naptr_result($dns_name, $enum_domain, $rr)
+                );
             }
-        }
 
-        if (!is_null($dns_root)) {
+            // Lookup the root zone for this record
+            $dns_root = null;
             for ($i = 0, $l = count($dns_part); $i < $l; ++$i) {
-                $dns_record = implode('.', array_slice($dns_part, $i));
-                try {
-                    $rrs = dns_get_record($dns_record, DNS_SOA, $resolver);
-                    foreach ($rrs as $rr) {
-                        if ($rr['type'] == 'SOA' && isset($rr['rname']) && !empty($rr['rname'])) {
-                            $email = implode('@', explode('.', $rr['rname'], 2));
-                            $dns_tree[$dns_record] = array(
-                                'email' => $email,
-                            );
-                        }
-                    }
-                } catch (Exception $e) {
-                }
-
-                if ($dns_record == $dns_root) {
+                if (!is_numeric($dns_part[$i])) {
+                    $dns_root = implode('.', array_slice($dns_part, $i));
                     break;
                 }
             }
+
+            if (!is_null($dns_root)) {
+                for ($i = 1, $l = count($dns_part); $i < $l; ++$i) {
+                    $dns_record = implode('.', array_slice($dns_part, $i));
+                    try {
+                        $rrs = dns_get_record($dns_record, DNS_ANY, $resolver);
+                        foreach ($rrs as $rr) {
+                            if (!isset($dns_tree[$dns_record])) {
+                                $dns_tree[$dns_record] = array('extra' => array());
+                            }
+
+                            switch ($rr['type']) {
+                            case 'SOA':
+                                if (!isset($rr['rname']) || empty($rr['rname']))
+                                    continue;
+
+                                $email = implode('@', explode('.', $rr['rname'], 2));
+                                $dns_tree[$dns_record]['email'] = $email;
+                                break;
+                            
+                            case 'TXT':
+                                if (!isset($rr['txt']) || empty($rr['txt']))
+                                    continue;
+
+                                if (preg_match('/^(\w+)=(.*)/', $rr['txt'], $match)) {
+                                    $match[1] = strtolower($match[1]);
+                                    if (in_array($match[1], array('bpa', 'desc', 'dds'))) {
+                                        $dns_tree[$dns_record][$match[1]] = $match[2];
+                                    } else {
+                                        $dns_tree[$dns_record]['extra'][] = array(
+                                            $match[1], $match[2]);
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    } catch (Exception $e) {
+                    }
+
+                    if ($dns_record == $dns_root) {
+                        break;
+                    }
+                }
+            }
+
+            if (count($dns_ptrs)) break;
         }
 
         echo $this->template('spacephone/lookup.html', array(
@@ -209,9 +239,11 @@ class SpacePhone {
 
         $data = file_get_contents($path);
         $page = array_merge($context, array(
+            'host' => gethostname(),
             'page' => $name,
             'text' => H2o::parseString($this->_markdown->text($data)),
         ));
+        $page['host'] = preg_replace('/\..*/', '', $page['host']);  // fqdn -> host
         $page['text'] = $page['text']->render($page);
 
         echo $this->template('spacephone/page.html', $page);
@@ -222,7 +254,7 @@ class SpacePhone {
             'navigation' => array(
                 '/'        => 'Home',
                 '/about/'  => 'About',
-                '/options/' => 'Configuration',
+                '/config/' => 'Configuration',
             ),
             'request'    => $this->_request(),
         ), $context);
@@ -307,8 +339,10 @@ class SpacePhone {
     private function _resolver_for($domain) {
         if (isset($this->options['resolvers'][$domain])) {
             return $this->options['resolvers'][$domain];
-        } else {
+        } elseif (isset($this->options['resolvers']['default'])) {
             return $this->options['resolvers']['default'];
+        } else {
+            return NULL;  // Use system resolvers
         }
     }
 
@@ -316,6 +350,7 @@ class SpacePhone {
      * Convert any string to a telephone number.
      */
     private function _tonumber($input) {
+        $input = (string) $input;
         $number = array();
 
         for ($i = 0, $l = strlen($input); $i < $l; ++$i) {
