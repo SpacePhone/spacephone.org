@@ -8,8 +8,14 @@
 {% if page == 'index' %}
     <li class="active">SpacePhone</li>
 {% else %}
+{% if page2 %}
+    <li><a href="/">SpacePhone</a></li>
+    <li><a href=".">{{ page|title }}</a></li>
+    <li class="active">{{ page2 }}</li>
+{% else %}
     <li><a href="/">SpacePhone</a></li>
     <li class="active">{{ page|title }}</li>
+{% endif %}
 {% endif %}
   </ol>
   <div class="col-md-9">

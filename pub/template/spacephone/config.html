@@ -16,38 +16,11 @@
     use of the SpacePhone telephone network, examples are provided below.
   </p>
 
-  <h3 id="asterisk">Asterisk
-  <a href="#asterisk">&para;</a></h3>
-  <p>
-    Add this to your (internal) context(s):
-  </p>
-  <pre>
-exten => _X.,1,NoOp("Space phone call to ${EXTEN}")
-exten => _X.,2,Set(sipcount=${ENUMLOOKUP(${EXTEN},sip,c,,e164.spacephone.org)})
-exten => _X.,3,Set(counter=0)
-exten => _X.,4,GotoIf($["${counter}"<"${sipcount}"]?5:7)
-exten => _X.,5,Dial(SIP/${ENUMLOOKUP(${EXTEN},sip,,${counter},e164.spacephone.org)})
-exten => _X.,6,GotoIf($["${counter}"<"${sipcount}"]?5:7)
-exten => _X.,7,NoOp("No valid entries in e164.spacephone.org for ${EXTEN}")
-</pre>
-  <h3 id="asterisk-ael">Asterisk, using Asterisk Extension Language (AEL)
-  <a href="#asterisk-ael">&para;</a></h3>
-  <p>
-    Add this to your (internal) context(s):
-  </p>
-  <pre>_X. => {
-    NoOp("Space phone call to ${EXTEN}");
-    sipcount=${ENUMLOOKUP(${EXTEN},sip,c,,e164.spacephone.org)};
-    counter=0;
-    if (${counter} < ${sipcount}) {
-        while (${counter} < ${sipcount}) {
-            Dial(SIP/${ENUMLOOKUP(${EXTEN},sip,,${counter},e164.spacephone.org)});
-            counter=${counter}+1;
-        }
-    } else {
-        NoOp("No valid entries in e164.spacephone.org for ${EXTEN}");
-        Dial(DAHDI/g1/${EXTEN});
-    }
-};</pre>
+<ul>
+  {% for item in items %}
+    <li><a href="{{ item }}">{{ item }}</a></li>
+  {% endfor %}
+</ul>
+
 </div>
 {% endblock %}

@@ -50,8 +50,21 @@ class SpacePhone {
         ), $options);
     }
 
-    public function config() {
-        echo $this->template('spacephone/config.html');
+    public function config($sub) {
+        function getFilename($path) {
+            // Note that path_info is acting up
+            return preg_replace("/.*\/([^\/\.]+)\.md/", "\\1", $path);
+        }
+
+        $page = "config/".$sub;
+        $items = Array( "asterisk", "freeswitch", "yate" );
+        $items = array_map( getFilename, glob("page/config/*.md"));
+        if( file_exists ( "page/".$page.".md" ) )
+            echo $this->page($page, Array( "page" => "Configuration", "page2" => ucfirst($sub)));
+        else
+            echo $this->template('spacephone/config.html', array(
+                'items' => $items
+            ));
     }
 
     public function error($code = 500, $context = array()) {
@@ -92,7 +105,7 @@ class SpacePhone {
                 break;
 
             case 'config':
-                $this->config();
+                $this->config(sizeof( $part ) > 1 ? $part[1] : false );
                 break;
 
             case 'lookup':
