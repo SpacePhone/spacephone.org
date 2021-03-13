@@ -17,7 +17,7 @@ foreach ($extern as $lib) {
 // Error handling
 error_reporting(E_ALL | E_STRICT);
 ini_set('error_log', join('/', array($logdir, 'error.log')));
-if (php_sapi_name() === 'cli' || 42) {
+if (php_sapi_name() === 'cli') {
     ini_set('display_errors', 1);
     ini_set('track_errors', 1);
     ini_set('html_errors', 1);

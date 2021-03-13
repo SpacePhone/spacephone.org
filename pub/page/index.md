@@ -14,7 +14,7 @@ ptt-tele.com, our founding father:
 
 Dutch hacker spaces:
 
- *  [ACKSpace](/lookup/31979922)
+ *  [ACKspace](/lookup/31979922)
  *  [bitlair](/lookup/31979923), since 2013-11-08
  *  [Mononoke](/lookup/31979966), since 2013-11-07
  *  [sk1llz](/lookup/31979975), since 2013-11-09

@@ -180,15 +180,15 @@ class SpacePhone {
                             switch ($rr['type']) {
                             case 'SOA':
                                 if (!isset($rr['rname']) || empty($rr['rname']))
-                                    continue;
+                                    break;
 
                                 $email = implode('@', explode('.', $rr['rname'], 2));
                                 $dns_tree[$dns_record]['email'] = $email;
                                 break;
-                            
+
                             case 'TXT':
                                 if (!isset($rr['txt']) || empty($rr['txt']))
-                                    continue;
+                                    break;
 
                                 if (preg_match('/^(\w+)=(.*)/', $rr['txt'], $match)) {
                                     $match[1] = strtolower($match[1]);
@@ -238,11 +238,11 @@ class SpacePhone {
         }
 
         $data = file_get_contents($path);
-        $page = array_merge($context, array(
+        $page = array_merge(array(
             'host' => gethostname(),
             'page' => $name,
             'text' => H2o::parseString($this->_markdown->text($data)),
-        ));
+        ),$context);
         $page['host'] = preg_replace('/\..*/', '', $page['host']);  // fqdn -> host
         $page['text'] = $page['text']->render($page);
 
